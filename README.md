@@ -1,2 +1,1 @@
-# set08118
-[uni] Artificial Intelligence coursework
+# Artificial Intelligence coursework
