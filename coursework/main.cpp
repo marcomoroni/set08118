@@ -1,23 +1,52 @@
 #include <SFML\Graphics.hpp>
+#include <fstream>
+
+using namespace std;
+using namespace sf;
+
+void Reset()
+{
+
+}
+
+void Load()
+{
+
+}
+
+void Update(RenderWindow &window)
+{
+	// Reset clock, recalculate deltatime
+	static Clock clock;
+	float dt = clock.restart().asSeconds();
+	// Check and consume events
+	Event event;
+	while (window.pollEvent(event)) {
+		if (event.type == Event::Closed) {
+			window.close();
+			return;
+		}
+	}
+
+	// Quit via ESC Key
+	if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+		window.close();
+	}
+}
+
+void Render(RenderWindow &window) {
+
+}
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(200, 200), "AI coursework");
-	sf::CircleShape shape(100.f);
-	shape.setFillColor(sf::Color::Green);
-
+	RenderWindow window(VideoMode(200, 200), "AI coursework");
+	Load();
 	while (window.isOpen())
 	{
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-			{
-				window.close();
-			}
-		}
 		window.clear();
-		window.draw(shape);
+		Update(window);
+		Render(window);
 		window.display();
 	}
 
