@@ -2,18 +2,21 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 using namespace std;
 using namespace sf;
 
-struct Cavern
+class Cavern
 {
+public:
+	Cavern() = default;
 	Vector2i pos;
 	vector<Cavern> connections = {};
 };
 
 int noOfCaverns;
-vector<Cavern> caverns;
+vector<Cavern*> caverns;
 Cavern* startCavern;
 Cavern* endCavern;
 
@@ -71,18 +74,17 @@ void Load()
 	// Coordinates
 	for (int i = 0; i < noOfCaverns; i++)
 	{
-		cout << "Looping for coord of cave " << i << "..." << endl;
-		Cavern newCavern;
-		newCavern.pos = { data.at(i), data.at(i + 1) }; // WRONG
+		auto newCavern = new Cavern();
+		newCavern->pos = { data.at(0), data.at(1) };
 		data.erase(data.begin());
 		data.erase(data.begin());
-		caverns.push_back(newCavern);
+		caverns.push_back(newCavern);		
 	}
 
 	// DEBUG
 	for (int i = 0; i < noOfCaverns; i++)
 	{
-		cout << "Cavern " << i << " coordinates: " << to_string(caverns.at(0).pos.x) << " " << to_string(caverns.at(0).pos.y) << endl;
+		cout << "Cavern " << i << " coordinates: " << to_string(caverns.at(i)->pos.x) << " " << to_string(caverns.at(i)->pos.y) << endl;
 	}
 }
 
