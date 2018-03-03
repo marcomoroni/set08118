@@ -4,6 +4,9 @@
 #include <sstream>
 #include <memory>
 
+#define WINDOW_HEIGHT 700
+#define WINDOW_WIDTH 1000
+
 using namespace std;
 using namespace sf;
 
@@ -12,6 +15,7 @@ class Cavern
 public:
 	Cavern() = default;
 	string name;
+	CircleShape shape;
 	Vector2i pos;
 	vector<Cavern*> connections = {};
 };
@@ -20,6 +24,11 @@ int noOfCaverns;
 vector<Cavern*> caverns;
 Cavern* startCavern;
 Cavern* endCavern;
+
+vector<CircleShape> dots;
+
+float biggestXCoord = 0.f;
+float biggestYCoord = 0.f;
 
 void Reset()
 {
@@ -87,6 +96,16 @@ void Load()
 		{
 			endCavern = newCavern;
 		}
+
+		// Set biggest coords
+		if (newCavern->pos.x > biggestXCoord)
+		{
+			biggestXCoord = newCavern->pos.x;
+		}
+		if (newCavern->pos.y > biggestYCoord)
+		{
+			biggestYCoord = newCavern->pos.y;
+		}
 	}
 
 	// DEBUG
@@ -124,6 +143,38 @@ void Load()
 	}
 	cout << endl;
 
+	// Setup grid
+	for (int x = 0; x < (int)biggestXCoord; x++)
+	{
+		for (int y = 0; y < (int)biggestXCoord; y++)
+		{
+			CircleShape newDot;
+			newDot.setPosition(x * WINDOW_WIDTH / biggestXCoord, y * WINDOW_HEIGHT / biggestYCoord);
+			newDot.setRadius(1.f);
+			newDot.setOrigin(0.5f, 0.5f);
+			newDot.setFillColor(Color(255, 255, 255, 140));
+			dots.push_back(newDot);
+		}
+	}
+
+	// Setup circles for caves
+	for (auto cavern : caverns)
+	{
+		cavern->shape.setPosition(cavern->pos.x * WINDOW_WIDTH / biggestXCoord, cavern->pos.y * WINDOW_HEIGHT / biggestYCoord);
+		cavern->shape.setRadius(4.f);
+		cavern->shape.setOrigin(2.f, 2.f);
+
+		// Different colour for first and last cavern
+		if (cavern == startCavern)
+		{
+			cavern->shape.setFillColor(Color::Green);
+		}
+		if (cavern == endCavern)
+		{
+			cavern->shape.setFillColor(Color::Red);
+		}
+	}
+
 }
 
 void Update(RenderWindow &window)
@@ -147,12 +198,19 @@ void Update(RenderWindow &window)
 }
 
 void Render(RenderWindow &window) {
-
+	for (auto dot : dots)
+	{
+		window.draw(dot);
+	}
+	for (auto cavern : caverns)
+	{
+		window.draw(cavern->shape);
+	}
 }
 
 int main()
 {
-	RenderWindow window(VideoMode(200, 200), "AI coursework");
+	RenderWindow window(VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "AI coursework");
 	Load();
 	while (window.isOpen())
 	{
