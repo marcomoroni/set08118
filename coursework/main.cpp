@@ -78,7 +78,16 @@ void Load()
 		newCavern->pos = { data.at(0), data.at(1) };
 		data.erase(data.begin());
 		data.erase(data.begin());
-		caverns.push_back(newCavern);		
+		caverns.push_back(newCavern);
+
+		// First and last caverns
+		if (i == 0) {
+			startCavern = newCavern;
+		}
+		if (i == noOfCaverns - 1)
+		{
+			endCavern = newCavern;
+		}
 	}
 
 	// DEBUG
