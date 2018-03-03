@@ -18,6 +18,7 @@ public:
 	CircleShape shape;
 	Vector2i pos;
 	vector<Node*> connections = {};
+	Node* parent;
 };
 
 class AI
@@ -27,7 +28,12 @@ public:
 	vector<Node*> openSet;
 	vector<Node*> closedSet;
 	Node* currentNode;
+	map<Node*, float> fs;
+	map<Node*, float> gs;
+
+	// Execute one step of A*
 	void nextStep();
+
 	bool isFinished = false;
 };
 
@@ -39,6 +45,8 @@ Node* startCavern;
 Node* endCavern;
 
 vector<CircleShape> dots; // Grid
+CircleShape caveHighlight;
+vector<RectangleShape> tunnels;
 
 float biggestXCoord = 0.f;
 float biggestYCoord = 0.f;
@@ -59,9 +67,10 @@ float calculate_g(float currentG, Node* current, Node* connection)
 // A*
 void AI::nextStep()
 {
-	cout << "Stepping..." << endl;
-	/*if (!openSet.empty())
+	cout << "Current node: " << currentNode->name << endl;
+	if (!openSet.empty())
 	{
+
 		for (auto connection : currentNode->connections)
 		{
 			// if connected node is not in closed set
@@ -70,13 +79,68 @@ void AI::nextStep()
 				openSet.push_back(connection);
 			}
 		}
+
+		cout << "Open set:";
+		for (auto c : openSet)
+		{
+			cout << " " << c->name;
+		}
+		cout << endl;
+
+		cout << "Closed set:";
+		for (auto c : closedSet)
+		{
+			cout << " " << c->name;
+		}
+		cout << endl;
+
 		for (auto cavern : openSet)
 		{
-			// Calculate evaluation function
-			//startCavern->setG(0);
-			//startCavern->calcH();
+			if (cavern != currentNode)
+			{
+				// Calculate evaluation function
+				float tempG = calculate_g(gs[currentNode], currentNode, cavern);
+				float tempF = tempG + calculate_h(cavern, endCavern);
+				cout << "Evaluation function for node " << cavern->name << ": " << to_string(tempF) << endl;
+
+				// 
+				if (fs.find(cavern) == fs.end() || tempF < fs[cavern])
+				{
+					gs[cavern] = tempG;
+					fs[cavern] = tempF;
+
+					if (find(currentNode->connections.begin(), currentNode->connections.end(), cavern) != currentNode->connections.end())
+					{
+						cavern->parent = currentNode;
+					}
+				}
+			}
 		}
-	}*/
+
+		// Move current node from open set to closed set
+		openSet.erase(remove(openSet.begin(), openSet.end(), currentNode), openSet.end());
+		closedSet.push_back(currentNode);
+
+		// Select new current node from open set with the lowest f
+		Node* newCurrentNode = openSet.at(0);
+		for (auto n : openSet)
+		{
+			if (fs[n] <= fs[newCurrentNode])
+			{
+				newCurrentNode = n;
+			}
+		}
+		currentNode = newCurrentNode;
+
+		// If end cavern reached
+		if (currentNode == endCavern)
+		{
+			isFinished = true;
+		}
+
+		cout << endl;
+
+	}
 }
 
 void Reset()
@@ -86,7 +150,7 @@ void Reset()
 
 void Load()
 {
-	string path = "res/input1.cav";
+	string path = "res/input2.cav";
 
 	string buffer;
 
@@ -192,6 +256,8 @@ void Load()
 	}
 	cout << endl;
 
+	// Draw connections
+
 	// Setup grid
 	for (int x = 0; x < (int)biggestXCoord + 1; x++)
 	{
@@ -200,7 +266,7 @@ void Load()
 			CircleShape newDot;
 			newDot.setPosition(x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, y * (WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
 			newDot.setRadius(1.4f);
-			newDot.setOrigin(0.7f, 0.7f);
+			newDot.setOrigin(1.4f, 1.4f);
 			newDot.setFillColor(Color::Black);
 			dots.push_back(newDot);
 		}
@@ -211,7 +277,7 @@ void Load()
 	{
 		cavern->shape.setPosition(cavern->pos.x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, cavern->pos.y *(WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
 		cavern->shape.setRadius(6.f);
-		cavern->shape.setOrigin(3.f, 3.f);
+		cavern->shape.setOrigin(6.f, 6.f);
 		cavern->shape.setFillColor(Color::Black);
 
 		// Different colour for first and last cavern
@@ -225,12 +291,37 @@ void Load()
 		}
 	}
 
+	// Setup visualisation of tunnels
+	for (auto cavern : caverns)
+	{
+		for (auto connection : cavern->connections)
+		{
+			// Set dimentions
+			float lenght = sqrt((cavern->shape.getPosition().x - connection->shape.getPosition().x) * (cavern->shape.getPosition().x - connection->shape.getPosition().x) + (cavern->shape.getPosition().y - connection->shape.getPosition().y) * (cavern->shape.getPosition().y - connection->shape.getPosition().y));
+			RectangleShape line({lenght, 1.5f});
+			line.setOrigin({ 0, 1.5f / 2 });
+			// Set position
+			line.setPosition(cavern->shape.getPosition());
+			// Set rotation
+			line.setRotation(atan2(connection->shape.getPosition().y - cavern->shape.getPosition().y, connection->shape.getPosition().x - cavern->shape.getPosition().x));
+			// Set style
+			line.setFillColor(Color::Black);
+
+			tunnels.push_back(line);
+		}
+	}
+
+	// Set up cave highlight
+	caveHighlight.setRadius(20.f);
+	caveHighlight.setOrigin(20.f, 20.f);
+	caveHighlight.setFillColor(Color(0, 0, 0, 10));
+
 	// Setup AI
 	ai = AI();
 	ai.openSet.push_back(startCavern);
 	ai.currentNode = startCavern;
-	//startCavern->setG(0);
-	//startCavern->calcH();
+	ai.gs[startCavern] = 0.0f;
+	ai.fs[startCavern] = 0.0f + calculate_h(startCavern, endCavern);
 
 }
 
@@ -281,12 +372,19 @@ void Update(RenderWindow &window)
 
 	inputCooldown -= dt;
 
+	caveHighlight.setPosition(ai.currentNode->shape.getPosition());
+
 }
 
 void Render(RenderWindow &window) {
+	window.draw(caveHighlight);
 	for (auto dot : dots)
 	{
 		window.draw(dot);
+	}
+	for (auto tunnel : tunnels)
+	{
+		window.draw(tunnel);
 	}
 	for (auto cavern : caverns)
 	{
