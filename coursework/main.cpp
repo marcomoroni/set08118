@@ -10,41 +10,33 @@
 using namespace std;
 using namespace sf;
 
-class Cavern
+class Node
 {
 public:
-	Cavern() = default;
+	Node() = default;
 	string name;
 	CircleShape shape;
 	Vector2i pos;
-	vector<Cavern*> connections = {};
-
-	// For AI
-	float getG() { return _g; }
-	float getH() { return _h; }
-	float getF() { return _g + _h; }
-	void setG(float g) { _g = g; }
-	void calcH();
-private:
-	float _g = -1; // path cost
-	float _h = -1; // straight-line distance from end node
+	vector<Node*> connections = {};
 };
 
 class AI
 {
 public:
 	AI() = default;
-	vector<Cavern*> openSet;
-	vector<Cavern*> closedSet;
-	Cavern* currentNode;
+	vector<Node*> openSet;
+	vector<Node*> closedSet;
+	Node* currentNode;
+	void nextStep();
+	bool isFinished = false;
 };
 
 AI ai;
 
 int noOfCaverns;
-vector<Cavern*> caverns;
-Cavern* startCavern;
-Cavern* endCavern;
+vector<Node*> caverns;
+Node* startCavern;
+Node* endCavern;
 
 vector<CircleShape> dots; // Grid
 
@@ -54,11 +46,37 @@ float margin = 100.f;
 
 bool autoMode = false; // is the user going to do step by step?
 
-void Cavern::calcH()
+float calculate_h(Node* current, Node* end)
 {
-	// Calculate it only if not already done
-	if (_h == -1)
-		_h = sqrt((endCavern->pos.x - pos.x) * (endCavern->pos.x - pos.x) + (endCavern->pos.y - pos.y) * (endCavern->pos.y - pos.y));
+	return sqrt((end->pos.x - current->pos.x) * (end->pos.x - current->pos.x) + (end->pos.y - current->pos.y) * (end->pos.y - current->pos.y));
+}
+
+float calculate_g(float currentG, Node* current, Node* connection)
+{
+	return currentG + sqrt((connection->pos.x - current->pos.x) * (connection->pos.x - current->pos.x) + (connection->pos.y - current->pos.y) * (connection->pos.y - current->pos.y));
+}
+
+// A*
+void AI::nextStep()
+{
+	cout << "Stepping..." << endl;
+	/*if (!openSet.empty())
+	{
+		for (auto connection : currentNode->connections)
+		{
+			// if connected node is not in closed set
+			if (!(find(closedSet.begin(), closedSet.end(), connection) != closedSet.end()))
+			{
+				openSet.push_back(connection);
+			}
+		}
+		for (auto cavern : openSet)
+		{
+			// Calculate evaluation function
+			//startCavern->setG(0);
+			//startCavern->calcH();
+		}
+	}*/
 }
 
 void Reset()
@@ -112,7 +130,7 @@ void Load()
 	// Coordinates and name
 	for (int i = 0; i < noOfCaverns; i++)
 	{
-		auto newCavern = new Cavern();
+		auto newCavern = new Node();
 		newCavern->pos = { data.at(0), data.at(1) };
 		newCavern->name = to_string(i + 1);
 		data.erase(data.begin());
@@ -211,14 +229,12 @@ void Load()
 	ai = AI();
 	ai.openSet.push_back(startCavern);
 	ai.currentNode = startCavern;
-	startCavern->setG(0);
-	startCavern->calcH();
-
-	// DEBUG
-	cout << "Start cavern path cost: " << to_string(startCavern->getG()) << endl;
-	cout << "Start cavern f(c):      " << to_string(startCavern->getF()) << endl;
+	//startCavern->setG(0);
+	//startCavern->calcH();
 
 }
+
+float stepCooldown = 0;
 
 void Update(RenderWindow &window)
 {
@@ -239,6 +255,24 @@ void Update(RenderWindow &window)
 	if (Keyboard::isKeyPressed(Keyboard::Escape)) {
 		window.close();
 	}
+
+	if (!autoMode)
+	{
+		if (Keyboard::isKeyPressed(Keyboard::Space) && !ai.isFinished && stepCooldown < 0)
+		{
+			ai.nextStep();
+			stepCooldown = 0.2f;
+		}
+	}
+	else
+	{
+		while (!ai.isFinished)
+		{
+			ai.nextStep();
+		}
+	}
+
+	stepCooldown -= dt;
 }
 
 void Render(RenderWindow &window) {
