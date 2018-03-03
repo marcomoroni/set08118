@@ -28,7 +28,7 @@ void Reset()
 
 void Load()
 {
-	string path = "res/input1.cav";
+	string path = "res/input2.cav";
 
 	string buffer;
 
@@ -44,7 +44,7 @@ void Load()
 	}
 	else
 	{
-		throw string("Couldn't open level file: ") + path;
+		throw string("Couldn't open cavern file: ") + path;
 	}
 
 	// DEBUG
