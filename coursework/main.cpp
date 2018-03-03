@@ -11,8 +11,9 @@ class Cavern
 {
 public:
 	Cavern() = default;
+	string name;
 	Vector2i pos;
-	vector<Cavern> connections = {};
+	vector<Cavern*> connections = {};
 };
 
 int noOfCaverns;
@@ -48,6 +49,7 @@ void Load()
 
 	// DEBUG
 	cout << "Buffer: " << buffer << endl;
+	cout << endl;
 
 	// Get numbers
 	stringstream ss(buffer);
@@ -65,17 +67,14 @@ void Load()
 
 	// DEBUG
 	cout << "noOfCaverns: " << to_string(noOfCaverns) << endl;
-	for (int i = 0; i < 6; i++)
-	{
-		cout << data.at(i) << ",";
-	}
-	cout << "..." << endl;
+	cout << endl;
 
-	// Coordinates
+	// Coordinates and name
 	for (int i = 0; i < noOfCaverns; i++)
 	{
 		auto newCavern = new Cavern();
 		newCavern->pos = { data.at(0), data.at(1) };
+		newCavern->name = to_string(i + 1);
 		data.erase(data.begin());
 		data.erase(data.begin());
 		caverns.push_back(newCavern);
@@ -93,8 +92,38 @@ void Load()
 	// DEBUG
 	for (int i = 0; i < noOfCaverns; i++)
 	{
-		cout << "Cavern " << i << " coordinates: " << to_string(caverns.at(i)->pos.x) << " " << to_string(caverns.at(i)->pos.y) << endl;
+		auto currentCavern = caverns.at(i);
+		cout << "Cavern " << currentCavern->name << " coordinates: " << to_string(currentCavern->pos.x) << " " << to_string(currentCavern->pos.y) << endl;
 	}
+	cout << endl;
+
+	// Connections
+	for (int cavernNo = 0; cavernNo < noOfCaverns; cavernNo++)
+	{
+		auto currentCavern = caverns.at(cavernNo);
+		for (int connectionNo = 0; connectionNo < noOfCaverns; connectionNo++)
+		{
+			// If there is a connection
+			if (data.at(0) == 1)
+			{
+				currentCavern->connections.push_back(caverns.at(connectionNo));
+			}
+
+			data.erase(data.begin());
+		}
+	}
+
+	// DEBUG
+	for (int cavernNo = 0; cavernNo < noOfCaverns; cavernNo++)
+	{
+		auto currentCavern = caverns.at(cavernNo);
+		for (auto connection : currentCavern->connections)
+		{
+			cout << "Cavern " << currentCavern->name << " connects to cave " << connection->name << endl;
+		}
+	}
+	cout << endl;
+
 }
 
 void Update(RenderWindow &window)
