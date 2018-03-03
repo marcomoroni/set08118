@@ -7,6 +7,8 @@
 #define WINDOW_HEIGHT 700
 #define WINDOW_WIDTH 1000
 
+#define AUTO_MODE false; // is the user going to do step by step?
+
 using namespace std;
 using namespace sf;
 
@@ -25,7 +27,7 @@ vector<Cavern*> caverns;
 Cavern* startCavern;
 Cavern* endCavern;
 
-vector<CircleShape> dots;
+vector<CircleShape> dots; // Grid
 
 float biggestXCoord = 0.f;
 float biggestYCoord = 0.f;
@@ -38,7 +40,7 @@ void Reset()
 
 void Load()
 {
-	string path = "res/input3.cav";
+	string path = "res/input1.cav";
 
 	string buffer;
 
@@ -150,11 +152,9 @@ void Load()
 		for (int y = 0; y < (int)biggestYCoord + 1; y++)
 		{
 			CircleShape newDot;
-			//newDot.setPosition(x * WINDOW_WIDTH / biggestXCoord, y * WINDOW_HEIGHT / biggestYCoord);
 			newDot.setPosition(x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, y * (WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
 			newDot.setRadius(1.4f);
 			newDot.setOrigin(0.7f, 0.7f);
-			//newDot.setFillColor(Color(180, 180, 180, 255));
 			newDot.setFillColor(Color::Black);
 			dots.push_back(newDot);
 		}
@@ -163,7 +163,6 @@ void Load()
 	// Setup circles for caves
 	for (auto cavern : caverns)
 	{
-		//cavern->shape.setPosition(cavern->pos.x * WINDOW_WIDTH / biggestXCoord, cavern->pos.y * WINDOW_HEIGHT / biggestYCoord);
 		cavern->shape.setPosition(cavern->pos.x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, cavern->pos.y *(WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
 		cavern->shape.setRadius(6.f);
 		cavern->shape.setOrigin(3.f, 3.f);
