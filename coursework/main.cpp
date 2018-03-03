@@ -29,6 +29,7 @@ vector<CircleShape> dots;
 
 float biggestXCoord = 0.f;
 float biggestYCoord = 0.f;
+float margin = 100.f;
 
 void Reset()
 {
@@ -37,7 +38,7 @@ void Reset()
 
 void Load()
 {
-	string path = "res/input2.cav";
+	string path = "res/input3.cav";
 
 	string buffer;
 
@@ -144,15 +145,17 @@ void Load()
 	cout << endl;
 
 	// Setup grid
-	for (int x = 0; x < (int)biggestXCoord; x++)
+	for (int x = 0; x < (int)biggestXCoord + 1; x++)
 	{
-		for (int y = 0; y < (int)biggestXCoord; y++)
+		for (int y = 0; y < (int)biggestYCoord + 1; y++)
 		{
 			CircleShape newDot;
-			newDot.setPosition(x * WINDOW_WIDTH / biggestXCoord, y * WINDOW_HEIGHT / biggestYCoord);
-			newDot.setRadius(1.f);
-			newDot.setOrigin(0.5f, 0.5f);
-			newDot.setFillColor(Color(255, 255, 255, 140));
+			//newDot.setPosition(x * WINDOW_WIDTH / biggestXCoord, y * WINDOW_HEIGHT / biggestYCoord);
+			newDot.setPosition(x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, y * (WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
+			newDot.setRadius(1.4f);
+			newDot.setOrigin(0.7f, 0.7f);
+			//newDot.setFillColor(Color(180, 180, 180, 255));
+			newDot.setFillColor(Color::Black);
 			dots.push_back(newDot);
 		}
 	}
@@ -160,9 +163,11 @@ void Load()
 	// Setup circles for caves
 	for (auto cavern : caverns)
 	{
-		cavern->shape.setPosition(cavern->pos.x * WINDOW_WIDTH / biggestXCoord, cavern->pos.y * WINDOW_HEIGHT / biggestYCoord);
-		cavern->shape.setRadius(4.f);
-		cavern->shape.setOrigin(2.f, 2.f);
+		//cavern->shape.setPosition(cavern->pos.x * WINDOW_WIDTH / biggestXCoord, cavern->pos.y * WINDOW_HEIGHT / biggestYCoord);
+		cavern->shape.setPosition(cavern->pos.x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, cavern->pos.y *(WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
+		cavern->shape.setRadius(6.f);
+		cavern->shape.setOrigin(3.f, 3.f);
+		cavern->shape.setFillColor(Color::Black);
 
 		// Different colour for first and last cavern
 		if (cavern == startCavern)
@@ -214,7 +219,7 @@ int main()
 	Load();
 	while (window.isOpen())
 	{
-		window.clear();
+		window.clear(Color::White);
 		Update(window);
 		Render(window);
 		window.display();
