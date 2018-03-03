@@ -7,8 +7,6 @@
 #define WINDOW_HEIGHT 700
 #define WINDOW_WIDTH 1000
 
-#define AUTO_MODE false; // is the user going to do step by step?
-
 using namespace std;
 using namespace sf;
 
@@ -20,7 +18,28 @@ public:
 	CircleShape shape;
 	Vector2i pos;
 	vector<Cavern*> connections = {};
+
+	// For AI
+	float getG() { return _g; }
+	float getH() { return _h; }
+	float getF() { return _g + _h; }
+	void setG(float g) { _g = g; }
+	void calcH();
+private:
+	float _g = -1; // path cost
+	float _h = -1; // straight-line distance from end node
 };
+
+class AI
+{
+public:
+	AI() = default;
+	vector<Cavern*> openSet;
+	vector<Cavern*> closedSet;
+	Cavern* currentNode;
+};
+
+AI ai;
 
 int noOfCaverns;
 vector<Cavern*> caverns;
@@ -32,6 +51,15 @@ vector<CircleShape> dots; // Grid
 float biggestXCoord = 0.f;
 float biggestYCoord = 0.f;
 float margin = 100.f;
+
+bool autoMode = false; // is the user going to do step by step?
+
+void Cavern::calcH()
+{
+	// Calculate it only if not already done
+	if (_h == -1)
+		_h = sqrt((endCavern->pos.x - pos.x) * (endCavern->pos.x - pos.x) + (endCavern->pos.y - pos.y) * (endCavern->pos.y - pos.y));
+}
 
 void Reset()
 {
@@ -179,6 +207,17 @@ void Load()
 		}
 	}
 
+	// Setup AI
+	ai = AI();
+	ai.openSet.push_back(startCavern);
+	ai.currentNode = startCavern;
+	startCavern->setG(0);
+	startCavern->calcH();
+
+	// DEBUG
+	cout << "Start cavern path cost: " << to_string(startCavern->getG()) << endl;
+	cout << "Start cavern f(c):      " << to_string(startCavern->getF()) << endl;
+
 }
 
 void Update(RenderWindow &window)
@@ -186,6 +225,7 @@ void Update(RenderWindow &window)
 	// Reset clock, recalculate deltatime
 	static Clock clock;
 	float dt = clock.restart().asSeconds();
+
 	// Check and consume events
 	Event event;
 	while (window.pollEvent(event)) {
