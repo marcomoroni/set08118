@@ -234,7 +234,7 @@ void Load()
 
 }
 
-float stepCooldown = 0;
+float inputCooldown = 0;
 
 void Update(RenderWindow &window)
 {
@@ -256,12 +256,13 @@ void Update(RenderWindow &window)
 		window.close();
 	}
 
+	// Excecute ai
 	if (!autoMode)
 	{
-		if (Keyboard::isKeyPressed(Keyboard::Space) && !ai.isFinished && stepCooldown < 0)
+		if (Keyboard::isKeyPressed(Keyboard::Space) && !ai.isFinished && inputCooldown < 0)
 		{
 			ai.nextStep();
-			stepCooldown = 0.2f;
+			inputCooldown = 0.2f;
 		}
 	}
 	else
@@ -272,7 +273,14 @@ void Update(RenderWindow &window)
 		}
 	}
 
-	stepCooldown -= dt;
+	// Change mode
+	if (Keyboard::isKeyPressed(Keyboard::M) && inputCooldown < 0)
+	{
+		autoMode = !autoMode;
+	}
+
+	inputCooldown -= dt;
+
 }
 
 void Render(RenderWindow &window) {
