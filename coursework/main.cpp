@@ -145,19 +145,6 @@ void AI::nextStep()
 	}
 }
 
-/*vector<Node*> calculate_final_path_from(Node* n)
-{
-	vector<Node*> path;
-
-	path.push_back(n);
-	if (n->parent != nullptr)
-	{
-		calculate_final_path_from(n->parent);
-	}
-
-	return path;
-}*/
-
 void reconstruct_final_path(Node* c)
 {
 	finalPath.push_back(c);
@@ -291,7 +278,7 @@ void Load()
 			newDot.setPosition(x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, y * (WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
 			newDot.setRadius(2.f);
 			newDot.setOrigin(2.f, 2.f);
-			newDot.setFillColor(Color(200, 200, 200, 255));
+			newDot.setFillColor(Color(220, 220, 220, 255));
 			dots.push_back(newDot);
 		}
 	}
@@ -302,16 +289,16 @@ void Load()
 		cavern->shape.setPosition(cavern->pos.x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, cavern->pos.y *(WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
 		cavern->shape.setRadius(10.f);
 		cavern->shape.setOrigin(10.f, 10.f);
-		cavern->shape.setFillColor(Color::Black);
+		cavern->shape.setFillColor(Color(60, 60, 60, 255));
 
 		// Different colour for first and last cavern
 		if (cavern == startCavern)
 		{
-			cavern->shape.setFillColor(Color::Green);
+			cavern->shape.setFillColor(Color(92, 214, 92, 255));
 		}
 		if (cavern == endCavern)
 		{
-			cavern->shape.setFillColor(Color::Red);
+			cavern->shape.setFillColor(Color(255, 80, 80, 255));
 		}
 	}
 
@@ -323,16 +310,15 @@ void Load()
 			// Set dimentions
 			float lenght = sqrt((cavern->shape.getPosition().x - connection->shape.getPosition().x) * (cavern->shape.getPosition().x - connection->shape.getPosition().x) + (cavern->shape.getPosition().y - connection->shape.getPosition().y) * (cavern->shape.getPosition().y - connection->shape.getPosition().y));
 			lenght = lenght - 20.f; // show that is one way only
-			RectangleShape line({lenght, 2.f});
-			line.setOrigin({ 0, 1.f });
+			RectangleShape line({lenght, 3.f});
+			line.setOrigin({ 0, 1.5f });
 			// Set position
 			line.setPosition(cavern->shape.getPosition());
 			// Set rotation
-			//line.setRotation(90.f);
 			auto angle = atan2(connection->shape.getPosition().y - cavern->shape.getPosition().y, connection->shape.getPosition().x - cavern->shape.getPosition().x);
 			line.setRotation(angle * (180 / M_PI));
 			// Set style
-			line.setFillColor(Color::Black);
+			line.setFillColor(Color(60, 60, 60, 255));
 
 			tunnels.push_back(line);
 		}
@@ -341,7 +327,7 @@ void Load()
 	// Set up cave highlight
 	caveHighlight.setRadius(20.f);
 	caveHighlight.setOrigin(20.f, 20.f);
-	caveHighlight.setFillColor(Color(0, 0, 0, 10));
+	caveHighlight.setFillColor(Color(0, 0, 0, 15));
 
 	// Setup AI
 	ai = AI();
@@ -396,13 +382,35 @@ void Update(RenderWindow &window)
 	{
 		reconstruct_final_path(endCavern);
 
+		// Draw coloured tunnels
+		for (auto c : finalPath)
+		{
+			if (c->parent != nullptr)
+			{
+				// Set dimentions
+				float lenght = sqrt((c->parent->shape.getPosition().x - c->shape.getPosition().x) * (c->parent->shape.getPosition().x - c->shape.getPosition().x) + (c->parent->shape.getPosition().y - c->shape.getPosition().y) * (c->parent->shape.getPosition().y - c->shape.getPosition().y));
+				lenght = lenght - 20.f; // show that is one way only
+				RectangleShape line({ lenght, 3.f });
+				line.setOrigin({ 0, 1.5f });
+				// Set position
+				line.setPosition(c->parent->shape.getPosition());
+				// Set rotation
+				auto angle = atan2(c->shape.getPosition().y - c->parent->shape.getPosition().y, c->shape.getPosition().x - c->parent->shape.getPosition().x);
+				line.setRotation(angle * (180 / M_PI));
+				// Set style
+				line.setFillColor(Color(51, 153, 255));
+
+				tunnels.push_back(line);
+			}
+		}
+
 		cout << "Final path:";
 		reverse(finalPath.begin(), finalPath.end());
 		for (auto c : finalPath)
 		{
 			cout << " " << c->name;
 		}
-		cout << endl << endl;
+		cout << endl;
 	}
 
 	// Change mode
@@ -411,9 +419,10 @@ void Update(RenderWindow &window)
 		autoMode = !autoMode;
 	}
 
-	inputCooldown -= dt;
+	if (inputCooldown >= 0) inputCooldown -= dt;
 
-	caveHighlight.setPosition(ai.currentNode->shape.getPosition());
+	if (!ai.isFinished) caveHighlight.setPosition(ai.currentNode->shape.getPosition());
+	else caveHighlight.setPosition({ -100.f, -100.f });
 
 }
 
