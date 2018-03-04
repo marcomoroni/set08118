@@ -6,6 +6,7 @@
 
 #define WINDOW_HEIGHT 700
 #define WINDOW_WIDTH 1000
+#define M_PI 3.14159265358979323846
 
 using namespace std;
 using namespace sf;
@@ -288,19 +289,19 @@ void Load()
 		{
 			CircleShape newDot;
 			newDot.setPosition(x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, y * (WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
-			newDot.setRadius(1.4f);
-			newDot.setOrigin(1.4f, 1.4f);
-			newDot.setFillColor(Color::Black);
+			newDot.setRadius(2.f);
+			newDot.setOrigin(2.f, 2.f);
+			newDot.setFillColor(Color(200, 200, 200, 255));
 			dots.push_back(newDot);
 		}
 	}
 
-	// Setup circles for caves
+	// Setup circles and labels for caves
 	for (auto cavern : caverns)
 	{
 		cavern->shape.setPosition(cavern->pos.x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, cavern->pos.y *(WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
-		cavern->shape.setRadius(6.f);
-		cavern->shape.setOrigin(6.f, 6.f);
+		cavern->shape.setRadius(10.f);
+		cavern->shape.setOrigin(10.f, 10.f);
 		cavern->shape.setFillColor(Color::Black);
 
 		// Different colour for first and last cavern
@@ -321,12 +322,15 @@ void Load()
 		{
 			// Set dimentions
 			float lenght = sqrt((cavern->shape.getPosition().x - connection->shape.getPosition().x) * (cavern->shape.getPosition().x - connection->shape.getPosition().x) + (cavern->shape.getPosition().y - connection->shape.getPosition().y) * (cavern->shape.getPosition().y - connection->shape.getPosition().y));
-			RectangleShape line({lenght, 1.5f});
-			line.setOrigin({ 0, 1.5f / 2 });
+			lenght = lenght - 20.f; // show that is one way only
+			RectangleShape line({lenght, 2.f});
+			line.setOrigin({ 0, 1.f });
 			// Set position
 			line.setPosition(cavern->shape.getPosition());
 			// Set rotation
-			line.setRotation(atan2(connection->shape.getPosition().y - cavern->shape.getPosition().y, connection->shape.getPosition().x - cavern->shape.getPosition().x));
+			//line.setRotation(90.f);
+			auto angle = atan2(connection->shape.getPosition().y - cavern->shape.getPosition().y, connection->shape.getPosition().x - cavern->shape.getPosition().x);
+			line.setRotation(angle * (180 / M_PI));
 			// Set style
 			line.setFillColor(Color::Black);
 
@@ -435,7 +439,7 @@ int main()
 	Load();
 	while (window.isOpen())
 	{
-		window.clear(Color::White);
+		window.clear(Color(245, 245, 245, 255));
 		Update(window);
 		Render(window);
 		window.display();
