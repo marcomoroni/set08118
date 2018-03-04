@@ -43,6 +43,7 @@ int noOfCaverns;
 vector<Node*> caverns;
 Node* startCavern;
 Node* endCavern;
+vector<Node*> finalPath;
 
 vector<CircleShape> dots; // Grid
 CircleShape caveHighlight;
@@ -140,6 +141,28 @@ void AI::nextStep()
 
 		cout << endl;
 
+	}
+}
+
+/*vector<Node*> calculate_final_path_from(Node* n)
+{
+	vector<Node*> path;
+
+	path.push_back(n);
+	if (n->parent != nullptr)
+	{
+		calculate_final_path_from(n->parent);
+	}
+
+	return path;
+}*/
+
+void reconstruct_final_path(Node* c)
+{
+	finalPath.push_back(c);
+	if (c->parent != nullptr)
+	{
+		reconstruct_final_path(c->parent);
 	}
 }
 
@@ -362,6 +385,20 @@ void Update(RenderWindow &window)
 		{
 			ai.nextStep();
 		}
+	}
+
+	// Final path
+	if (ai.isFinished && finalPath.empty())
+	{
+		reconstruct_final_path(endCavern);
+
+		cout << "Final path:";
+		reverse(finalPath.begin(), finalPath.end());
+		for (auto c : finalPath)
+		{
+			cout << " " << c->name;
+		}
+		cout << endl << endl;
 	}
 
 	// Change mode
