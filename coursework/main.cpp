@@ -11,6 +11,7 @@
 #define NEUTRAL_COLOR Color(70, 70, 70)
 #define GRID_COLOR Color(220, 220, 220)
 #define BACKGROUND_COLOR Color(245, 245, 250)
+#define CAVE_HIGHLIGHT_COLOR Color(0, 0, 0, 15)
 
 using namespace std;
 using namespace sf;
@@ -50,27 +51,30 @@ Node* startCavern;
 Node* endCavern;
 vector<Node*> finalPath;
 
+// Visual elements
 vector<CircleShape> dots; // Grid
-CircleShape caveHighlight;
+CircleShape caveHighlight; // To highlight current cave
 vector<RectangleShape> tunnels;
 
-float biggestXCoord = 0.f;
-float biggestYCoord = 0.f;
-float margin = 100.f;
+float biggestXCoord = 0.f; // Used to draw grid
+float biggestYCoord = 0.f; // Used to draw grid
+float margin = 100.f; // Used to draw grid
 
 bool autoMode = false; // is the user going to do step by step?
 
+// Calculate heuristic: euclidian distance from to end node
 float calculate_h(Node* current, Node* end)
 {
 	return sqrt((end->pos.x - current->pos.x) * (end->pos.x - current->pos.x) + (end->pos.y - current->pos.y) * (end->pos.y - current->pos.y));
 }
 
+// Calculate path distance from beginning
 float calculate_g(float currentG, Node* current, Node* connection)
 {
 	return currentG + sqrt((connection->pos.x - current->pos.x) * (connection->pos.x - current->pos.x) + (connection->pos.y - current->pos.y) * (connection->pos.y - current->pos.y));
 }
 
-// A*
+// A* (one step) -----------------------------------------------------------------------------------------
 void AI::nextStep()
 {
 	cout << "Current node: " << currentNode->name << endl;
@@ -148,7 +152,9 @@ void AI::nextStep()
 
 	}
 }
+// -------------------------------------------------------------------------------------------------------
 
+// Recursively get parent node to recreate the final path
 void reconstruct_final_path(Node* c)
 {
 	finalPath.push_back(c);
@@ -156,11 +162,6 @@ void reconstruct_final_path(Node* c)
 	{
 		reconstruct_final_path(c->parent);
 	}
-}
-
-void Reset()
-{
-
 }
 
 void Load()
@@ -189,6 +190,7 @@ void Load()
 	cout << endl;
 
 	// Get numbers
+	// Store the in vector `data`. When a value is read, delete it
 	stringstream ss(buffer);
 	vector<int> data;
 	while (ss.good())
@@ -201,12 +203,11 @@ void Load()
 	// Number of caves
 	noOfCaverns = data.at(0);
 	data.erase(data.begin());
-
-	// DEBUG
 	cout << "noOfCaverns: " << to_string(noOfCaverns) << endl;
 	cout << endl;
 
-	// Coordinates and name
+	// Store cavern coordinates
+	// and give them a name
 	for (int i = 0; i < noOfCaverns; i++)
 	{
 		auto newCavern = new Node();
@@ -226,6 +227,7 @@ void Load()
 		}
 
 		// Set biggest coords
+		// (for visualisation)
 		if (newCavern->pos.x > biggestXCoord)
 		{
 			biggestXCoord = newCavern->pos.x;
@@ -235,8 +237,6 @@ void Load()
 			biggestYCoord = newCavern->pos.y;
 		}
 	}
-
-	// DEBUG
 	for (int i = 0; i < noOfCaverns; i++)
 	{
 		auto currentCavern = caverns.at(i);
@@ -259,8 +259,6 @@ void Load()
 			data.erase(data.begin());
 		}
 	}
-
-	// DEBUG
 	for (int cavernNo = 0; cavernNo < noOfCaverns; cavernNo++)
 	{
 		auto currentCavern = caverns.at(cavernNo);
@@ -271,9 +269,7 @@ void Load()
 	}
 	cout << endl;
 
-	// Draw connections
-
-	// Setup grid
+	// Setup grid (visualisation)
 	for (int x = 0; x < (int)biggestXCoord + 1; x++)
 	{
 		for (int y = 0; y < (int)biggestYCoord + 1; y++)
@@ -287,7 +283,7 @@ void Load()
 		}
 	}
 
-	// Setup circles and labels for caves
+	// Setup circles for caves (visualisation)
 	for (auto cavern : caverns)
 	{
 		cavern->shape.setPosition(cavern->pos.x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, cavern->pos.y *(WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
@@ -309,7 +305,7 @@ void Load()
 		}
 	}
 
-	// Setup visualisation of tunnels
+	// Setup tunnels (visualisation)
 	for (auto cavern : caverns)
 	{
 		for (auto connection : cavern->connections)
@@ -331,10 +327,10 @@ void Load()
 		}
 	}
 
-	// Set up cave highlight
+	// Set up cave highlight (visualisation)
 	caveHighlight.setRadius(20.f);
 	caveHighlight.setOrigin(20.f, 20.f);
-	caveHighlight.setFillColor(Color(0, 0, 0, 15));
+	caveHighlight.setFillColor(CAVE_HIGHLIGHT_COLOR);
 
 	// Setup AI
 	ai = AI();
@@ -368,7 +364,7 @@ void Update(RenderWindow &window)
 		window.close();
 	}
 
-	// Excecute ai
+	// Excecute an ai step
 	if (!autoMode)
 	{
 		if (Keyboard::isKeyPressed(Keyboard::Space) && !ai.isFinished && inputCooldown < 0)
@@ -390,7 +386,7 @@ void Update(RenderWindow &window)
 	{
 		reconstruct_final_path(endCavern);
 
-		// Draw coloured tunnels
+		// Draw coloured tunnels (visualisation)
 		for (auto c : finalPath)
 		{
 			if (c->parent != nullptr)
@@ -406,7 +402,6 @@ void Update(RenderWindow &window)
 				auto angle = atan2(c->shape.getPosition().y - c->parent->shape.getPosition().y, c->shape.getPosition().x - c->parent->shape.getPosition().x);
 				line.setRotation(angle * (180 / M_PI));
 				// Set style
-				//line.setFillColor(Color(51, 153, 255));
 				line.setFillColor(ACCENT_COLOUR);
 
 				tunnels.push_back(line);
@@ -446,18 +441,9 @@ void Update(RenderWindow &window)
 
 void Render(RenderWindow &window) {
 	window.draw(caveHighlight);
-	for (auto dot : dots)
-	{
-		window.draw(dot);
-	}
-	for (auto tunnel : tunnels)
-	{
-		window.draw(tunnel);
-	}
-	for (auto cavern : caverns)
-	{
-		window.draw(cavern->shape);
-	}
+	for (auto dot : dots) window.draw(dot);
+	for (auto tunnel : tunnels) window.draw(tunnel);
+	for (auto cavern : caverns) window.draw(cavern->shape);
 }
 
 int main()
