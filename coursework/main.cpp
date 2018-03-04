@@ -346,6 +346,7 @@ void Load()
 }
 
 float inputCooldown = 0;
+bool shrinkCaveHiglight = false;
 
 void Update(RenderWindow &window)
 {
@@ -429,8 +430,17 @@ void Update(RenderWindow &window)
 
 	if (inputCooldown >= 0) inputCooldown -= dt;
 
+	// Highlight current node
 	if (!ai.isFinished) caveHighlight.setPosition(ai.currentNode->shape.getPosition());
 	else caveHighlight.setPosition({ -100.f, -100.f });
+
+	// Cave higlight effect
+	Vector2f newScale;
+	if (shrinkCaveHiglight) newScale = { caveHighlight.getScale().x - 0.2f * dt, caveHighlight.getScale().y - 0.2f * dt };
+	else newScale = { caveHighlight.getScale().x + 0.2f * dt, caveHighlight.getScale().y + 0.2f * dt };
+	if (caveHighlight.getScale().x > 1.2f) shrinkCaveHiglight = true;
+	if (caveHighlight.getScale().x < 1.0f) shrinkCaveHiglight = false;
+	caveHighlight.setScale(newScale);
 
 }
 
