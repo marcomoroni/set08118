@@ -4,9 +4,13 @@
 #include <sstream>
 #include <memory>
 
-#define WINDOW_HEIGHT 700
-#define WINDOW_WIDTH 1000
+#define WINDOW_HEIGHT 800
+#define WINDOW_WIDTH 1200
 #define M_PI 3.14159265358979323846
+#define ACCENT_COLOUR Color(153, 153, 255)
+#define NEUTRAL_COLOR Color(70, 70, 70)
+#define GRID_COLOR Color(220, 220, 220)
+#define BACKGROUND_COLOR Color(245, 245, 250)
 
 using namespace std;
 using namespace sf;
@@ -278,7 +282,7 @@ void Load()
 			newDot.setPosition(x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, y * (WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
 			newDot.setRadius(2.f);
 			newDot.setOrigin(2.f, 2.f);
-			newDot.setFillColor(Color(220, 220, 220, 255));
+			newDot.setFillColor(GRID_COLOR);
 			dots.push_back(newDot);
 		}
 	}
@@ -289,16 +293,19 @@ void Load()
 		cavern->shape.setPosition(cavern->pos.x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, cavern->pos.y *(WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
 		cavern->shape.setRadius(10.f);
 		cavern->shape.setOrigin(10.f, 10.f);
-		cavern->shape.setFillColor(Color(60, 60, 60, 255));
+		cavern->shape.setFillColor(NEUTRAL_COLOR);
 
 		// Different colour for first and last cavern
 		if (cavern == startCavern)
 		{
-			cavern->shape.setFillColor(Color(92, 214, 92, 255));
+			//cavern->shape.setFillColor(Color(92, 214, 92, 255));
+			//cavern->shape.setFillColor(Color(51, 153, 255));
+			cavern->shape.setFillColor(ACCENT_COLOUR);
 		}
 		if (cavern == endCavern)
 		{
-			cavern->shape.setFillColor(Color(255, 80, 80, 255));
+			//cavern->shape.setFillColor(Color(255, 80, 80, 255));
+			cavern->shape.setFillColor(ACCENT_COLOUR);
 		}
 	}
 
@@ -318,7 +325,7 @@ void Load()
 			auto angle = atan2(connection->shape.getPosition().y - cavern->shape.getPosition().y, connection->shape.getPosition().x - cavern->shape.getPosition().x);
 			line.setRotation(angle * (180 / M_PI));
 			// Set style
-			line.setFillColor(Color(60, 60, 60, 255));
+			line.setFillColor(NEUTRAL_COLOR);
 
 			tunnels.push_back(line);
 		}
@@ -398,7 +405,8 @@ void Update(RenderWindow &window)
 				auto angle = atan2(c->shape.getPosition().y - c->parent->shape.getPosition().y, c->shape.getPosition().x - c->parent->shape.getPosition().x);
 				line.setRotation(angle * (180 / M_PI));
 				// Set style
-				line.setFillColor(Color(51, 153, 255));
+				//line.setFillColor(Color(51, 153, 255));
+				line.setFillColor(ACCENT_COLOUR);
 
 				tunnels.push_back(line);
 			}
@@ -448,7 +456,7 @@ int main()
 	Load();
 	while (window.isOpen())
 	{
-		window.clear(Color(245, 245, 245, 255));
+		window.clear(BACKGROUND_COLOR);
 		Update(window);
 		Render(window);
 		window.display();
