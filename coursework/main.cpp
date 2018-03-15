@@ -418,6 +418,8 @@ void Update(RenderWindow &window)
 			cout << " " << c->name;
 		}
 		cout << endl;
+
+		cout << "Path lenght: " << ai.fs[ai.currentNode] << endl << endl;
 	}
 
 	// Change mode
