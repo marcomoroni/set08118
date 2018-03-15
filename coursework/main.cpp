@@ -253,7 +253,8 @@ void Load()
 			// If there is a connection
 			if (data.at(0) == 1)
 			{
-				currentCavern->connections.push_back(caverns.at(connectionNo));
+				//currentCavern->connections.push_back(caverns.at(connectionNo));
+				caverns.at(connectionNo)->connections.push_back(currentCavern);
 			}
 
 			data.erase(data.begin());
