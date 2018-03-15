@@ -166,7 +166,7 @@ void reconstruct_final_path(Node* c)
 
 void Load()
 {
-	string path = "res/input2.cav";
+	string path = "res/input.cav";
 
 	string buffer;
 
@@ -286,7 +286,9 @@ void Load()
 	// Setup circles for caves (visualisation)
 	for (auto cavern : caverns)
 	{
-		cavern->shape.setPosition(cavern->pos.x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, cavern->pos.y *(WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);
+		cavern->shape.setPosition(cavern->pos.x * (WINDOW_WIDTH - margin * 2) / biggestXCoord + margin, cavern->pos.y * (WINDOW_HEIGHT - margin * 2) / biggestYCoord + margin);	
+		// Mirror on y axis, because the center in SFML the y axis is positive when going down
+		cavern->shape.setPosition(cavern->shape.getPosition().x, WINDOW_HEIGHT - cavern->shape.getPosition().y);	
 		cavern->shape.setRadius(10.f);
 		cavern->shape.setOrigin(10.f, 10.f);
 		cavern->shape.setFillColor(NEUTRAL_COLOR);
