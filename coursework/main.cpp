@@ -252,7 +252,6 @@ void Load()
 			// If there is a connection
 			if (data.at(0) == 1)
 			{
-				//currentCavern->connections.push_back(caverns.at(connectionNo));
 				caverns.at(b)->connections.push_back(caverns.at(a));
 			}
 
@@ -294,17 +293,8 @@ void Load()
 		cavern->shape.setFillColor(NEUTRAL_COLOR);
 
 		// Different colour for first and last cavern
-		if (cavern == startCavern)
-		{
-			//cavern->shape.setFillColor(Color(92, 214, 92, 255));
-			//cavern->shape.setFillColor(Color(51, 153, 255));
-			cavern->shape.setFillColor(ACCENT_COLOUR);
-		}
-		if (cavern == endCavern)
-		{
-			//cavern->shape.setFillColor(Color(255, 80, 80, 255));
-			cavern->shape.setFillColor(ACCENT_COLOUR);
-		}
+		if (cavern == startCavern) cavern->shape.setFillColor(ACCENT_COLOUR);
+		if (cavern == endCavern) cavern->shape.setFillColor(ACCENT_COLOUR);
 	}
 
 	// Setup tunnels (visualisation)
