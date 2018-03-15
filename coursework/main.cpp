@@ -245,16 +245,15 @@ void Load()
 	cout << endl;
 
 	// Connections
-	for (int cavernNo = 0; cavernNo < noOfCaverns; cavernNo++)
+	for (int a = 0; a < noOfCaverns; a++)
 	{
-		auto currentCavern = caverns.at(cavernNo);
-		for (int connectionNo = 0; connectionNo < noOfCaverns; connectionNo++)
+		for (int b = 0; b < noOfCaverns; b++)
 		{
 			// If there is a connection
 			if (data.at(0) == 1)
 			{
 				//currentCavern->connections.push_back(caverns.at(connectionNo));
-				caverns.at(connectionNo)->connections.push_back(currentCavern);
+				caverns.at(b)->connections.push_back(caverns.at(a));
 			}
 
 			data.erase(data.begin());
