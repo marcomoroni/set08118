@@ -29,13 +29,13 @@ after_build:
 
     7z a AI_cw_%CONFIGURATION%_win64.zip %APPVEYOR_BUILD_FOLDER%/build/bin/%CONFIGURATION%/AI_cw_main.exe %APPVEYOR_BUILD_FOLDER%/build/bin/%CONFIGURATION%/*.dll  %APPVEYOR_BUILD_FOLDER%/build/bin/%CONFIGURATION%/**/*
     
-    #cd ../build/installer/
+#    cd ../build/installer/
     
-    #dir
+#    dir
     
-    #for %%a in (*.exe) do ren "%%~a" "%%~na_%CONFIGURATION%_win64%%~xa"
+#    for %%a in (*.exe) do ren "%%~a" "%%~na_%CONFIGURATION%_win64%%~xa"
     
-    #dir
+#    dir
     
 #artifacts:
 #  - path: build/*.zip
